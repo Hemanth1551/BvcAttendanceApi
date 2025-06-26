@@ -53,6 +53,7 @@ exports.registerStudent = async (req, res) => {
       },
     });
 
+  const verificationLink1 = `${process.env.BACKEND_URL}/api/auth/verify?email=${encodeURIComponent(student.email)}&token=${encodeURIComponent(hashedPassword)}`;
 
     // Send mail
   await transporter.sendMail({
@@ -62,7 +63,7 @@ exports.registerStudent = async (req, res) => {
     html: `
       <p>Hello ${newStudent.name},</p>
       <p>Please verify your account by clicking the link below:</p>
-      <a href="http://localhost:5000/api/auth/verify?email=${encodeURIComponent(newStudent.email)}&token=${encodeURIComponent(hashedPassword)}">
+      <a href="${verificationLink1}">
         Verify Account
       </a>
       <p>This link will expire in 1 hour.</p>
@@ -154,7 +155,7 @@ res.send(`
     <div class="container">
       <h1>✅ Account Verified</h1>
       <p>Your account has been successfully verified. You can now log in.</p>
-      <a href="http://localhost:5173/signin" class="button">Go to Login</a>
+      <a href="${process.env.FRONTEND_URL}/signin" class="button">Go to Login</a>
     </div>
   </body>
   </html>
@@ -192,8 +193,8 @@ exports.loginStudent = async (req, res) => {
       const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
-          user: 'bvcitsattendance@gmail.com',
-          pass: 'ztli kluz xaan sppf', // use App Password, NOT your email password
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS, // use App Password, NOT your email password
         },
       });
 
