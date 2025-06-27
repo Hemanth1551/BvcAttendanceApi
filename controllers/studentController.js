@@ -307,7 +307,7 @@ exports.passwordChangeByEmailConfig = async (req, res) => {
     const student = await Student.findOne({ email });
 
     if (student) {
-      return res.status(200).json({ exists: true });
+      return res.status(200).json({ exists: true, studentId: student._id });
     } else {
       return res.status(200).json({ exists: false });
     }
