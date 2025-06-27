@@ -1,4 +1,6 @@
 const studentAttendance = require('../models/StudentAttendance');
+const clgdays = require('../models/ClgDays');
+
 
 // add student attendence
 exports.addStudentAttendance = async (req, res) => {
@@ -35,4 +37,32 @@ exports.getAttendanceByStudentId = async (req, res) => {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
+
+exports.getStudentAttendanceMerged = async (req, res) => {
+  const { studentId } = req.params;
+
+  try {
+    const workingDays = await clgdays.find({ action: "workingday" }).sort({ date: 1 });
+    const attendanceRecords = await studentAttendance.find({ studentId });
+
+    const attendanceMap = {};
+    attendanceRecords.forEach((rec) => {
+      const date = rec.date.toISOString().split('T')[0];
+      attendanceMap[date] = rec.status || 'present'; // default to present
+    });
+
+    const merged = workingDays.map((day) => {
+      const date = day.date.toISOString().split('T')[0];
+      return {
+        date: date,
+        status: attendanceMap[date] || 'absent', // absent if not found
+      };
+    });
+
+    res.status(200).json(merged);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
 
