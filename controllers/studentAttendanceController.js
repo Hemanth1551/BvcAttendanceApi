@@ -26,9 +26,9 @@ exports.getAttendanceByStudentId = async (req, res) => {
 
   try {
     const attendanceRecords = await studentAttendance.find({ studentId });
-    if (!attendanceRecords.length) {
-      return res.status(404).json({ message: 'No attendance found for this student' });
-    }
+    // if (!attendanceRecords.length) {
+    //   return res.status(404).json({ message: 'No attendance found for this student' });
+    // }
 
     res.status(200).json(attendanceRecords);
   } catch (err) {
