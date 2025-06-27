@@ -45,24 +45,22 @@ exports.getStudentAttendanceMerged = async (req, res) => {
     const workingDays = await clgdays.find({ action: "workingday" }).sort({ date: 1 });
     const attendanceRecords = await studentAttendance.find({ studentId });
 
-    const attendanceMap = {};
-    attendanceRecords.forEach((rec) => {
-      const date = rec.date.toISOString().split('T')[0];
-      attendanceMap[date] = rec.status || 'present'; // default to present
-    });
+    const markedDates = new Set(
+      attendanceRecords.map((rec) => rec.date.toISOString().split('T')[0])
+    );
 
-    const merged = workingDays.map((day) => {
-      const date = day.date.toISOString().split('T')[0];
-      return {
-        date: date,
-        status: attendanceMap[date] || 'absent', // absent if not found
-      };
-    });
+    const merged = workingDays
+      .filter((day) => !markedDates.has(day.date.toISOString().split('T')[0]))
+      .map((day) => ({
+        date: day.date.toISOString().split('T')[0],
+        status: 'absent',
+      }));
 
     res.status(200).json(merged);
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
+
 
 
