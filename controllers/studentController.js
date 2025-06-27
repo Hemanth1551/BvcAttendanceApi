@@ -53,7 +53,7 @@ exports.registerStudent = async (req, res) => {
       },
     });
 
-  const verificationLink1 = `${process.env.BACKEND_URL}/api/auth/verify?email=${encodeURIComponent(student.email)}&token=${encodeURIComponent(hashedPassword)}`;
+  const verificationLink1 = `${process.env.BACKEND_URL}/api/auth/verify?email=${encodeURIComponent(newStudent.email)}&token=${encodeURIComponent(hashedPassword)}`;
 
     // Send mail
   await transporter.sendMail({
