@@ -81,6 +81,17 @@ exports.registerStudent = async (req, res) => {
 };
 
 
+exports.getStudentsByBranch = async (req, res) => {
+  const { branch } = req.body;
+  try{
+    const students = await Student.find({ branch : branch });
+    res.status(200).json(students)
+
+  }catch(err){
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+}
+
 
 exports.studentVerification = async (req, res) => {
   const { email, token } = req.query; // Use req.query for GET params
