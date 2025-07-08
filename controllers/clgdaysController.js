@@ -38,6 +38,16 @@ exports.getAllclgdays = async (req, res) => {
     }
 }
 
+exports.getSingleDay = async (req, res) => {
+    try{
+        const { date } = req.body;
+        const day = await clgdays.findOne({ date : date });
+        res.status(200).json(day);
+    }catch(err){
+        res.status(500).json({message: 'server error', error: err.message});
+    }
+}
+
 exports.getAllclaWorkingDays = async (req, res) => {
     try{
         const days = await clgdays.find({ action: "workingday" }).sort({ date : 1 });
