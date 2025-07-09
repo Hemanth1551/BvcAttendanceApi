@@ -1,5 +1,6 @@
 const studentAttendance = require('../models/StudentAttendance');
 const clgdays = require('../models/ClgDays');
+const student = require('../models/Student');
 
 
 // add student attendence
@@ -57,6 +58,44 @@ exports.getStudentAttendanceMerged = async (req, res) => {
       }));
 
     res.status(200).json(merged);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+
+exports.getAllstudentattedancestoid = async (req, res) => {
+  try {
+    const allStudentAttendance = await studentAttendance.find();
+    const allStudents = await student.find();
+
+    // Create a Map of studentId to student object for fast lookup
+    const studentMap = new Map();
+    allStudents.forEach(stu => {
+      if (stu && stu._id) {
+        studentMap.set(String(stu._id), stu);
+      }
+    });
+
+    const combinedData = allStudentAttendance.map(att => {
+      const studentId = att?.studentId?.toString?.(); // ensure string format
+      const studentData = studentMap.get(studentId) || {};
+
+      return {
+        studentId: studentId || null,
+        email: studentData.email || null,
+        rollNumber: studentData.rollNumber || null,
+        name: studentData.name || null,
+        date: att.date || null,
+        branch: studentData.branch || null,
+        presentedClasses: att.presentedClasses || 0,
+        missingClasses: att.missingClasses || 0,
+        status: att.status || null,
+        markedTime: att.markedTime || null
+      };
+    });
+
+    res.status(200).json(combinedData);
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
