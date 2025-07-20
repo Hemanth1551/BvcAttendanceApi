@@ -101,5 +101,20 @@ exports.getAllstudentattedancestoid = async (req, res) => {
   }
 };
 
+exports.deleteattendance = async (req, res) => {
+  try {
+    const { stuId, date } = req.params;
+    const result = await studentAttendance.deleteOne({ studentId: stuId, date: date });
+
+    if (result.deletedCount > 0) {
+      res.status(200).json({ message: 'Attendance was deleted.' });
+    } else {
+      res.status(404).json({ message: 'Attendance not found. Nothing was deleted.' });
+    }
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
 
 
