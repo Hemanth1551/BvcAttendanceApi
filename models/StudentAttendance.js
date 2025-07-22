@@ -25,14 +25,6 @@ const AttendanceSchema = new mongoose.Schema({
     markedTime: {
         type: Date,
         required: true,
-    },
-    location: {
-        type: String,
-        required: true,
-    },
-    ipaddress: {
-        type: String,
-        required: true,
     }
 }, { timestamps: true });
 
