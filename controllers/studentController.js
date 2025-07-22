@@ -270,6 +270,12 @@ exports.loginStudent = async (req, res) => {
 exports.deviceIdcheck = async (req,res) => {
   try{
     const {email, deviceId} = req.body;
+
+    const existingStudentdeviceId = await Student.findOne({ deviceId });
+    if (existingStudentdeviceId) {
+      return res.status(400).json({ message: 'This device already exists in this system.' });
+    }
+    
     const stu = await Student.findOneAndUpdate(
       { email: email },
       { $set: { deviceId: deviceId } },
