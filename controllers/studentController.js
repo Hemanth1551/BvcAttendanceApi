@@ -11,14 +11,14 @@ const nodemailer = require('nodemailer');
 exports.registerStudent = async (req, res) => {
   const {
     name, email, password, rollNumber,
-    branch, year, section, phone, gender
+    branch, year, section, phone, gender, deviceId
   } = req.body;
 
   const validateBvcEmail = (email) =>
     /^[a-zA-Z0-9._%+-]+@bvcits\.edu\.in$/.test(email);
 
   try {
-    if (!name || !email || !password || !rollNumber || !branch || !year || !section || !phone || !gender) {
+    if (!name || !email || !password || !rollNumber || !branch || !year || !section || !phone || !gender || !deviceId) {
       return res.status(400).json({ message: "Please fill all required fields." });
     }
 
@@ -29,6 +29,11 @@ exports.registerStudent = async (req, res) => {
     const existingStudent = await Student.findOne({ email });
     if (existingStudent) {
       return res.status(400).json({ message: 'Student already exists' });
+    }
+
+    const existingStudentdeviceId = await Student.findOne({ deviceId });
+    if (existingStudentdeviceId) {
+      return res.status(400).json({ message: 'This device already exists in this system.' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -43,6 +48,7 @@ exports.registerStudent = async (req, res) => {
       section,
       phone,
       gender,
+      deviceId,
     });
 
 
@@ -252,6 +258,7 @@ exports.loginStudent = async (req, res) => {
         phone: student.phone,
         gender: student.gender,
         verify: student.verify,
+        deviceId: student.deviceId,
       }
     });
   } catch (err) {
@@ -259,6 +266,21 @@ exports.loginStudent = async (req, res) => {
   }
 };
 
+
+exports.deviceIdcheck = async (req,res) => {
+  try{
+    const {email, deviceId} = req.body;
+    const stu = await Student.findOneAndUpdate(
+      { email: email },
+      { $set: { deviceId: deviceId } },
+      { new: true } // return the updated document
+    );
+    
+    res.status(200).json(stu);
+  }catch{
+    res.status(500).json({ message: 'Server error' });
+  }
+}
 
 
 exports.passwordChange = async (req, res) => {
