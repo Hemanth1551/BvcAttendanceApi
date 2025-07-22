@@ -138,6 +138,47 @@ exports.getAllstudentattedancestoid = async (req, res) => {
   }
 };
 
+exports.getAllstudenttodayattedances = async (req, res) => {
+  try{
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+    const isoMidnightUTC = today.toISOString().replace('Z', '+00:00');
+    // const isoMidnightUTC = "2025-07-12T00:00:00.000+00:00";
+    const allstudenttodayattedancedata = await studentAttendance.find({ date : isoMidnightUTC });
+    const allStudents = await student.find();
+
+    const studentMap = new Map();
+    allStudents.forEach(stu => {
+      if (stu && stu._id) {
+        studentMap.set(String(stu._id), stu);
+      }
+    });
+
+    const combinedData = allstudenttodayattedancedata.map(att => {
+      const studentId = att?.studentId?.toString?.(); // ensure string format
+      const studentData = studentMap.get(studentId) || {};
+
+      return {
+        studentId: studentId || null,
+        email: studentData.email || null,
+        rollNumber: studentData.rollNumber || null,
+        name: studentData.name || null,
+        date: att.date || null,
+        branch: studentData.branch || null,
+        presentedClasses: att.presentedClasses || 0,
+        missingClasses: att.missingClasses || 0,
+        status: att.status || null,
+        markedTime: att.markedTime || null
+      };
+    });
+
+    res.status(200).json(combinedData);
+  }catch(err){
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+}
+
+
 exports.deleteattendance = async (req, res) => {
   try {
     const { stuId, date } = req.params;
