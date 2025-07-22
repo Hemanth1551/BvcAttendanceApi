@@ -4,19 +4,56 @@ const student = require('../models/Student');
 
 
 // add student attendence
+// exports.addStudentAttendance = async (req, res) => {
+//     const { studentId, date, presentedClasses, missingClasses, status, markedTime} = req.body;
+
+//     try{
+//         const existingAttendance = await studentAttendance.findOne({ studentId, date });
+//         if (existingAttendance) {
+//             return res.status(400).json({ message: 'Attendance already exists' });
+//         }
+
+//         const newStudentAttendance = await studentAttendance.create({
+//             studentId, date, presentedClasses, missingClasses, status, markedTime
+//         });
+//         res.status(200).json({message: 'Attendance added was successfully'});
+//     }catch(err){
+//         res.status(500).json({ message: 'Server error', error: err.message });
+//     }
+// }
+
+
 exports.addStudentAttendance = async (req, res) => {
-    const { studentId, date, presentedClasses, missingClasses, status, markedTime} = req.body;
+    const { studentId, date, presentedClasses, missingClasses, status, markedTime, inCollege, deviceId} = req.body;
 
     try{
-        const existingAttendance = await studentAttendance.findOne({ studentId, date });
-        if (existingAttendance) {
-            return res.status(400).json({ message: 'Attendance already exists' });
+        const stu = await student.findOne({_id:studentId});
+        if(stu.deviceId === deviceId){
+          const existingAttendancewithip = await studentAttendance.find({ date, deviceId });
+            if (existingAttendancewithip.length > 0) {
+                return res.status(400).json({ message: 'Attendance for this date has already been submitted from your device.' });
+            } 
+            if(status === "present"){
+              if(inCollege === true){
+                const location = "AtCollage";
+                const newStudentAttendance = await studentAttendance.create({
+                  studentId, date, presentedClasses, missingClasses, status, markedTime, location, deviceId
+                });
+                res.status(200).json({message: 'Attendance added was successfully'});
+              }else{
+                return res.status(400).json({ message: 'Your not in collage area.' });
+              }
+            }else if(status === "absent"){
+              const location = "AtOutofCollage";
+              const newStudentAttendance = await studentAttendance.create({
+                  studentId, date, presentedClasses, missingClasses, status, markedTime, location, deviceId
+                });
+                res.status(200).json({message: 'Attendance added was successfully'});
+            }
         }
-
-        const newStudentAttendance = await studentAttendance.create({
-            studentId, date, presentedClasses, missingClasses, status, markedTime
-        });
-        res.status(200).json({message: 'Attendance added was successfully'});
+        else{
+          return res.status(400).json({ message: 'Dont post others attedance' });
+        }
     }catch(err){
         res.status(500).json({ message: 'Server error', error: err.message });
     }
