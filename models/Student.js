@@ -39,11 +39,7 @@ const StudentSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  verify: { type: Boolean, default: false },
-  ipaddress: {
-    type: String,
-    required: true,
-  }
+  verify: { type: Boolean, default: false }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Student', StudentSchema);
